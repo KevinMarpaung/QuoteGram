@@ -5,6 +5,8 @@ import ActionFilter from "../Components/Fragments/ActionFilter";
 
 const Home = () => {
   const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [isFiltered, setIsFiltered] = useState(false); // Track if the data is filtered
 
   useEffect(() => {
     const NewData = localStorage.getItem("dataquotes");
@@ -12,46 +14,49 @@ const Home = () => {
       try {
         const parse = JSON.parse(NewData);
         setData(parse);
-        console.log("data berhasil diambil");
+        setFilteredData(parse); // Set filtered data to initial data
+        console.log("Data berhasil diambil");
       } catch (error) {
-        console.log("data gagal diambil", error);
+        console.log("Data gagal diambil", error);
       }
     }
   }, []);
 
   const handleFilter = (nama) => {
-    const NewData = localStorage.getItem("dataquotes");
-    if (NewData) {
-      try {
-        const parse = JSON.parse(NewData);
-        const updatedData = parse.filter((dat) => dat.Pemotivasi === nama);
-        setData(updatedData);
-        console.log("Data yang difilter:", updatedData);
-      } catch (error) {
-        console.log("Data gagal difilter", error);
-      }
-    }
+    const filtered = data.filter((dat) => dat.Pemotivasi === nama);
+    setFilteredData(filtered);
+    setIsFiltered(true); // Set filter flag to true
+    console.log("Data yang difilter:", filtered);
+  };
+
+  const handleResetFilter = () => {
+    setFilteredData(data);
+    setIsFiltered(false); // Reset filter flag to false
   };
 
   return (
     <>
-      <Navbar></Navbar>
-      <div className="flex border  justify-center gap-2">
-        {data.map((dat) => {
-          return (
-            <>
-              <ActionFilter
-                handleFilter={handleFilter}
-                key={dat.id}
-                nama={dat.Pemotivasi}
-              />
-            </>
-          );
-        })}
+      <Navbar />
+      <div className="flex border justify-center gap-2">
+        {isFiltered && (
+          <button
+            onClick={handleResetFilter}
+            className="bg-white my-2 rounded-md px-3 py-1"
+          >
+            Kembali
+          </button>
+        )}
+        {data.map((dat) => (
+          <ActionFilter
+            handleFilter={handleFilter}
+            key={dat.id}
+            nama={dat.Pemotivasi}
+          />
+        ))}
       </div>
-      <div className="mx-4 my-4 flex gap-2 flex-wrap  justify-center">
-        {data.length > 0 ? (
-          data.map((dat) => (
+      <div className="mx-4 my-4 flex gap-2 flex-wrap justify-center">
+        {filteredData.length > 0 ? (
+          filteredData.map((dat) => (
             <CardQuotes
               key={dat.id}
               pemotivasi={dat.Pemotivasi}
